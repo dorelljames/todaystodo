@@ -1,5 +1,73 @@
 import React from "react";
 import axios from "axios";
+import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
+
+const auth = {
+  isAuthenticated: localStorage.getItem("isTodoLoggedIn") || false,
+  login(credentials) {
+    return axios
+      .post("https://testreacttodoapp.herokuapp.com/auth/local", credentials)
+      .then(response => response.data)
+      .catch(err => console.log("error", err));
+  },
+  logout() {}
+};
+
+class Login extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      isAuthenticated: auth.isAuthenticated
+    };
+  }
+
+  handleSubmit = e => {
+    console.log(e);
+    auth
+      .login({
+        identifier: e.target.querySelector("input[name='username']").value,
+        password: e.target.querySelector("input[name='password']").value
+      })
+      .then(data => {
+        auth.isAuthenticated = true;
+        this.setState({
+          isAuthenticated: true
+        });
+
+        localStorage.setItem("isTodoLoggedIn", true);
+        console.log(auth);
+      });
+
+    // console.log(auth);
+
+    e.preventDefault();
+  };
+
+  render() {
+    console.log("auth", auth);
+    if (auth.isAuthenticated) {
+      return (
+        <Redirect
+          to={{
+            pathname: "/"
+          }}
+        />
+      );
+    }
+
+    return (
+      <form method="post" onSubmit={this.handleSubmit}>
+        <p>
+          Username: <input type="text" name="username" />
+        </p>
+        <p>
+          Password: <input type="password" name="password" />
+        </p>
+        <button>Login</button>
+      </form>
+    );
+  }
+}
 
 class App extends React.Component {
   constructor() {
@@ -57,6 +125,16 @@ class App extends React.Component {
   }
 
   render() {
+    if (!auth.isAuthenticated) {
+      return (
+        <Redirect
+          to={{
+            pathname: "/login"
+          }}
+        />
+      );
+    }
+
     return (
       <div>
         <h2>Todo list</h2>
@@ -81,4 +159,15 @@ class App extends React.Component {
   }
 }
 
-export default App;
+class Main extends React.Component {
+  render() {
+    return (
+      <Router>
+        <Route exact path="/" component={App} />
+        <Route path="/login" component={Login} />
+      </Router>
+    );
+  }
+}
+
+export default Main;
