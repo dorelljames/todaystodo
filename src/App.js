@@ -71,7 +71,7 @@ class App extends React.Component {
             {this.state.todos.map(todo => (
               <li key={todo.id}>
                 {todo.title}{" "}
-                <button onClick={e => this.handleDelete(todo.id)}>x</button>
+                <button onClick={e => this.handleDelete(todo.id)}>DELETE</button>
               </li>
             ))}
           </ul>
